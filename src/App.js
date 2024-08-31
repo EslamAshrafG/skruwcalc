@@ -131,6 +131,7 @@ function Box({ children }) {
 }
 
 function PlayersList({ players, numRounds, setPlayersPoints }) {
+  const [isOpen, setIsOpen] = useState(true);
   // Handle updating a specific player's points
   const handleUpdatePlayerPoints = (index, updatedPoints) => {
     setPlayersPoints((prevPlayers) =>
@@ -141,24 +142,31 @@ function PlayersList({ players, numRounds, setPlayersPoints }) {
   };
 
   return (
-    <ul className="players-list">
-      {players.map((player, index) => (
-        <Player
-          key={index}
-          numRounds={numRounds}
-          player={player}
-          updatePlayerPoints={(updatedPoints) =>
-            handleUpdatePlayerPoints(index, updatedPoints)
-          }
-        />
-      ))}
-    </ul>
+    <>
+      {/* <button className="btn-toggle" onClick={() => setIsOpen((open) => !open)}>
+        {isOpen ? "–" : "+"}
+      </button> */}
+      {isOpen && (
+        <ul className="players-list">
+          {players.map((player, index) => (
+            <Player
+              key={index}
+              numRounds={numRounds}
+              player={player}
+              updatePlayerPoints={(updatedPoints) =>
+                handleUpdatePlayerPoints(index, updatedPoints)
+              }
+            />
+          ))}
+        </ul>
+      )}
+    </>
   );
 }
 
 function Player({ player, numRounds, updatePlayerPoints }) {
   const total = Object.values(player)
-    .slice(1, -1)
+    .slice(1)
     .reduce((acc, curr) => acc + curr, 0); // Exclude the name key
 
   function updatePoint(roundNumber, value) {
