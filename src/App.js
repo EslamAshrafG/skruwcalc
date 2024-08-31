@@ -73,6 +73,7 @@ export default function App() {
             players={playersPoints}
             setPlayersPoints={setPlayersPoints}
           />
+          <LeadBoard players={playersPoints} />
         </Box>
       </Main>
       <Footer />
@@ -96,8 +97,8 @@ function NumRounds({ numRounds, setNumRounds }) {
   function updateNumRounds(e) {
     if (!Number.isFinite(+e.target.value) || +e.target.value > 5) return;
     setNumRounds(+e.target.value);
-    console.log(numRounds);
   }
+
   return (
     <p className="num-results">
       <strong>
@@ -157,7 +158,7 @@ function PlayersList({ players, numRounds, setPlayersPoints }) {
 
 function Player({ player, numRounds, updatePlayerPoints }) {
   const total = Object.values(player)
-    .slice(1)
+    .slice(1, -1)
     .reduce((acc, curr) => acc + curr, 0); // Exclude the name key
 
   function updatePoint(roundNumber, value) {
@@ -180,6 +181,7 @@ function Player({ player, numRounds, updatePlayerPoints }) {
             roundNumber={num}
             point={player[`p${num}`]}
             updatePoint={updatePoint}
+            total={total}
           />
         ))}
       </RoundsList>
@@ -226,5 +228,64 @@ function Footer() {
         </a>
       </p>
     </footer>
+  );
+}
+
+function LeadBoard({ players }) {
+  const playersLead = players
+    .map((player) => {
+      const total = Object.values(player)
+        .slice(1, -1) // Exclude the name key
+        .reduce((acc, curr) => acc + curr, 0);
+      return { ...player, total };
+    })
+    .sort((a, b) => {
+      if (!a.name) return 1; // Move unnamed player down
+      if (!b.name) return -1; // Keep named player up
+      return a.total - b.total; // Sort by total points in descending order
+    });
+
+  return (
+    <div
+      className="leadboard"
+      style={{
+        padding: "20px",
+        backgroundColor: "#212529", // --color-background-900
+        borderRadius: "10px",
+        boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+        color: "#dee2e6", // --color-text
+        fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+        margin: "10px 0",
+      }}
+    >
+      {playersLead.map((player, i) => (
+        <div
+          key={i}
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            padding: "10px",
+            marginBottom: "10px",
+            backgroundColor: "#2b3035", // --color-background-500
+            borderRadius: "5px",
+            color: i === 0 ? "#6741d9" : "#adb5bd", // --color-primary for the first, --color-text-dark for others
+            fontWeight: i === 0 ? "bold" : "normal",
+            fontSize: "18px",
+          }}
+        >
+          <>
+            <span>
+              {i + 1} - {player.name || "Unnamed Player"}
+            </span>
+            <span style={{ color: "#fa5252" }}>
+              {" "}
+              {/* --color-red for points */}
+              {player.total}
+            </span>
+          </>
+        </div>
+      ))}
+    </div>
   );
 }
