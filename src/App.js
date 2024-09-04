@@ -243,7 +243,7 @@ function LeadBoard({ players }) {
   const playersLead = players
     .map((player) => {
       const total = Object.values(player)
-        .slice(1, -1) // Exclude the name key
+        .slice(1) // Exclude the name key
         .reduce((acc, curr) => acc + curr, 0);
       return { ...player, total };
     })
