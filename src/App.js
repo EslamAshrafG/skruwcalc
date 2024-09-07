@@ -87,8 +87,13 @@ function NavBar({ children }) {
 
 function Logo() {
   return (
-    <div className="logo">
-      <h1>🃏Skrew Calculator</h1>
+    <div className="logo" style={{ display: "flex", alignItems: "center" }}>
+      <img
+        src="./5VLbEUlI9v3S35hYgFljATTGwt45wb5L0IDJccUV.webp"
+        style={{ width: "40px", aspectRatio: "1/1" }}
+        alt=""
+      />{" "}
+      <h1>Skrew Calculator</h1>
     </div>
   );
 }
