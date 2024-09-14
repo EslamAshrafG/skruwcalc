@@ -7,30 +7,35 @@ function generateInitialPlayers(numRounds) {
       ...Object.fromEntries(
         Array.from({ length: numRounds }, (_, i) => [`p${i + 1}`, 0])
       ),
+      penalty: 0,
     },
     {
       name: "",
       ...Object.fromEntries(
         Array.from({ length: numRounds }, (_, i) => [`p${i + 1}`, 0])
       ),
+      penalty: 0,
     },
     {
       name: "",
       ...Object.fromEntries(
         Array.from({ length: numRounds }, (_, i) => [`p${i + 1}`, 0])
       ),
+      penalty: 0,
     },
     {
       name: "",
       ...Object.fromEntries(
         Array.from({ length: numRounds }, (_, i) => [`p${i + 1}`, 0])
       ),
+      penalty: 0,
     },
     {
       name: "",
       ...Object.fromEntries(
         Array.from({ length: numRounds }, (_, i) => [`p${i + 1}`, 0])
       ),
+      penalty: 0,
     },
   ];
 }
@@ -42,6 +47,7 @@ const generateNewPoints = (playersArr, numRounds) => {
       ...Object.fromEntries(
         Array.from({ length: numRounds }, (_, i) => [`p${i + 1}`, 0])
       ),
+      penalty: 0,
     };
   });
 };
@@ -73,7 +79,7 @@ export default function App() {
             players={playersPoints}
             setPlayersPoints={setPlayersPoints}
           />
-          <LeadBoard players={playersPoints} />
+          <LeadBoard players={playersPoints} numRounds={numRounds} />
         </Box>
       </Main>
       <Footer />
@@ -136,7 +142,6 @@ function Box({ children }) {
 }
 
 function PlayersList({ players, numRounds, setPlayersPoints }) {
-  const [isOpen, setIsOpen] = useState(true);
   // Handle updating a specific player's points
   const handleUpdatePlayerPoints = (index, updatedPoints) => {
     setPlayersPoints((prevPlayers) =>
@@ -148,45 +153,62 @@ function PlayersList({ players, numRounds, setPlayersPoints }) {
 
   return (
     <>
-      {/* <button className="btn-toggle" onClick={() => setIsOpen((open) => !open)}>
-        {isOpen ? "–" : "+"}
-      </button> */}
-      {isOpen && (
-        <ul className="players-list">
-          {players.map((player, index) => (
-            <Player
-              key={index}
-              numRounds={numRounds}
-              player={player}
-              updatePlayerPoints={(updatedPoints) =>
-                handleUpdatePlayerPoints(index, updatedPoints)
-              }
-            />
-          ))}
-        </ul>
-      )}
+      <ul className="players-list">
+        {players.map((player, index) => (
+          <Player
+            key={index}
+            numRounds={numRounds}
+            player={player}
+            updatePlayerPoints={(updatedPoints) =>
+              handleUpdatePlayerPoints(index, updatedPoints)
+            }
+          />
+        ))}
+      </ul>
     </>
   );
 }
 
 function Player({ player, numRounds, updatePlayerPoints }) {
-  const total = Object.values(player)
+  let total = Object.values(player)
     .slice(1)
-    .reduce((acc, curr) => acc + curr, 0); // Exclude the name key
+    .reduce(
+      (acc, curr, i) =>
+        numRounds - i <= 2 && i !== Object.keys(player).length - 2
+          ? acc + curr * 2
+          : acc + curr,
+      0
+    ); // Exclude the name key
 
   function updatePoint(roundNumber, value) {
+    // if (numRounds - roundNumber < 2)
+    //   updatePlayerPoints({ [`p${roundNumber}`]: value * 2 });
     updatePlayerPoints({ [`p${roundNumber}`]: value });
+  }
+
+  function addValueToTotal(value) {
+    updatePlayerPoints({
+      penalty: value + player.penalty < 0 ? 0 : value + player.penalty,
+    });
   }
 
   return (
     <li className="player">
-      <input
-        className="player-name"
-        type="text"
-        value={player.name}
-        placeholder="Type Player Name Here..."
-        onChange={(e) => updatePlayerPoints({ name: e.target.value })}
-      />
+      <div>
+        <input
+          className="player-name"
+          type="text"
+          value={player.name}
+          placeholder="Type Player Name Here..."
+          onChange={(e) => updatePlayerPoints({ name: e.target.value })}
+        />
+        <button className="plus" onClick={() => addValueToTotal(10)}>
+          <span>+10</span>
+        </button>
+        <button className="minus" onClick={() => addValueToTotal(-10)}>
+          <span>-10</span>
+        </button>
+      </div>
       <RoundsList>
         {Array.from({ length: numRounds }, (_, i) => i + 1).map((num) => (
           <Round
@@ -195,6 +217,7 @@ function Player({ player, numRounds, updatePlayerPoints }) {
             point={player[`p${num}`]}
             updatePoint={updatePoint}
             total={total}
+            numRounds={numRounds}
           />
         ))}
       </RoundsList>
@@ -210,15 +233,31 @@ function RoundsList({ children }) {
 const greenPointsStyle = { backgroundColor: "green", color: "white" };
 const redPointsStyle = { backgroundColor: "red", color: "white" };
 
-function Round({ roundNumber, point, updatePoint }) {
+function Round({ roundNumber, point, updatePoint, numRounds }) {
   function handleRoundInput(e) {
     if (!Number.isFinite(+e.target.value)) return;
     updatePoint(roundNumber, +e.target.value);
   }
 
   return (
-    <div className="round">
+    <div className="round" style={{ position: "relative" }}>
       <span>Round {roundNumber}:</span>
+      {numRounds - roundNumber < 2 && (
+        <span
+          style={{
+            color: "white",
+            fontSize: "10px",
+            position: "absolute",
+            bottom: "-10px",
+            right: "15px",
+            backgroundColor: "red",
+            padding: "2px",
+            borderRadius: "5px",
+          }}
+        >
+          double
+        </span>
+      )}
       <input
         type="text"
         style={
@@ -244,12 +283,18 @@ function Footer() {
   );
 }
 
-function LeadBoard({ players }) {
+function LeadBoard({ players, numRounds }) {
   const playersLead = players
     .map((player) => {
       const total = Object.values(player)
         .slice(1) // Exclude the name key
-        .reduce((acc, curr) => acc + curr, 0);
+        .reduce(
+          (acc, curr, i) =>
+            numRounds - i <= 2 && i !== Object.keys(player).length - 2
+              ? acc + curr * 2
+              : acc + curr,
+          0
+        );
       return { ...player, total };
     })
     .sort((a, b) => {

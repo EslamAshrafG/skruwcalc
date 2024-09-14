@@ -186,3 +186,32 @@ footer a {
   font-weight: bold;
   text-decoration: none;
 }
+
+.plus {
+  margin: 0 15px;
+}
+
+.plus,
+.minus {
+  border: 0;
+  outline: 0;
+  font-size: 16px;
+  padding: 7px;
+  border-radius: 50%;
+  aspect-ratio: 1/1;
+  width: 33px;
+  text-align: center;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  cursor: pointer;
+}
+
+.plus {
+  background-color: #952828;
+}
+
+.minus {
+  background-color: green;
+}
